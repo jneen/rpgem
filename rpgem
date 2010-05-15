@@ -1,0 +1,101 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'optparse'
+require 'rubygems'
+require 'rubygems/format'
+
+module FileUtils
+  def self.in_dir(dir)
+    cwd = `pwd`.strip
+    cd dir
+    r = yield
+    cd cwd
+    r
+  end
+end
+
+
+class RPGem
+  CWD = `pwd`.strip
+  TMP = "#{CWD}/tmp"
+  BUILD = "#{CWD}/rpmbuild"
+
+  def initialize(name, version, options={})
+    @name = name
+    @version = version
+  end
+
+  attr_reader :name, :version
+
+  def to_s
+    "#{@name}-#{@version}"
+  end
+
+  def sources_dir
+    "#{BUILD}/SOURCES/#{self.to_s}"
+  end
+
+  def gem_loc
+    "#{TMP}/#{self.to_s}.gem"
+  end
+
+  def format
+    Gem::Format.from_file_by_path(gem_loc)
+  end
+
+  def fetch!
+    if File.exists? self.gem_loc
+      puts "Skipping fetch of #{self.to_s}"
+    else
+      puts "Fetching the gem #{self.to_s}"
+      FileUtils.in_dir TMP do
+        system("gem fetch #{@name} --version #{@version}")
+      end
+    end
+  end
+
+  def unpack!
+    if File.directory? self.sources_dir
+      puts "Skipping unpack of #{self.to_s}"
+    else
+      FileUtils.in_dir TMP do
+        puts "unpacking into SOURCES"
+        system("gem unpack #{gem_loc} --target=#{sources_dir}")
+      end
+    end
+  end
+
+  def setup!
+    fetch!
+    unpack!
+  end
+end
+
+def setup(gem_name, version)
+  gem = RPGem.new(gem_name, version)
+
+  format = Gem::Format.from_file_by_path(gem_for(gem_name, version))
+  spec = format.spec
+
+  spec.description ||= spec.summary
+
+  #TODO: add a recursive option
+  #spec.runtime_dependencies.each do |dep|
+  #  setup(dep.name)
+  #end
+end
+
+#puts "clearing tmp/"
+#FileUtils.rm_r "tmp" if File.directory? "tmp"
+FileUtils.mkdir RPGem::TMP unless File.directory? RPGem::TMP
+
+unless File.directory? RPGem::BUILD
+  FileUtils.mkdir RPGem::BUILD
+  FileUtils.in_dir RPGem::BUILD do
+    FileUtils.mkdir "SOURCES"
+    FileUtils.mkdir "SPECS"
+  end
+end
+
+RPGem.new(ARGV[0], ARGV[1]).setup!
