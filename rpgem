@@ -1,90 +1,51 @@
-#!/usr/bin/env ruby
+#!/bin/bash
+gem_current_version() {
+  #HACK ALERT.
+  gem specification -r $1 | \
+    egrep '^ *version: [0-9]+(\.[0-9]+)+' | \
+    awk '{ print $2 }'
+}
 
-require 'fileutils'
-require 'optparse'
-require 'rubygems'
-require 'rubygems/format'
+options=$(getopt ":a:" $*)
+echo "options='$options'"
 
-module FileUtils
-  def self.in_dir(dir)
-    cwd = `pwd`.strip
-    cd dir
-    r = yield
-    cd cwd
-    r
-  end
-end
+args=${options% -- *}
+gem_name=${options#* -- }
+echo "gem_name=\"$gem_name\", and args=\"$args\""
 
+version=""
+#TODO: get version automatically
+while getopts ":v:" flag; do
+  if [ "$flag" == 'v' ]; then
+    version=$OPTARG
+  fi
+done
+if [ -z $version ]; then
+  version=$(gem_current_version $gem_name)
+fi
+echo "using $gem_name version $version"
 
-class RPGem
-  CWD = `pwd`.strip
-  TMP = "#{CWD}/tmp"
-  BUILD = "#{CWD}/rpmbuild"
+gem_title=$gem_name-$version
 
-  def initialize(name, version, options={})
-    @name = name
-    @version = version
-  end
+mkdir -p ./rpmbuild/{SOURCES,SPECS}
+ls ./template.spec.rb
 
-  attr_reader :name, :version
+if [ ! -e rpmbuild/SOURCES/$gem_title.gem ]; then
+  echo "Downloading gem $gem_name, version $version"
+  cd rpmbuild/SOURCES && gem fetch $gem_name --version $version
+  cd ../..
+else
+  echo "Skipping download of $gem_title"
+fi
 
-  def to_s
-    "#{@name}-#{@version}"
-  end
+chmod +x ./template.spec.rb
 
-  def sources_dir
-    "#{BUILD}/SOURCES"
-  end
+echo "building spec file..."
+./template.spec.rb rpmbuild/SOURCES/$gem_title.gem $args \
+  > ./rpmbuild/SPECS/rpgem-$gem_title.spec
+echo "done"
 
-  def gem_loc
-    "#{sources_dir}/#{self.to_s}.gem"
-  end
-
-  def format
-    Gem::Format.from_file_by_path(gem_loc)
-  end
-
-  def fetch!
-    if File.exists? self.gem_loc
-      puts "Skipping fetch of #{self.to_s}"
-    else
-      puts "Fetching the gem #{self.to_s}"
-      FileUtils.in_dir TMP do
-        system("gem fetch #{@name} --version #{@version}")
-      end
-    end
-  end
-
-  def setup!
-    fetch!
-    unpack!
-  end
-end
-
-def setup(gem_name, version)
-  gem = RPGem.new(gem_name, version)
-
-  format = Gem::Format.from_file_by_path(gem_for(gem_name, version))
-  spec = format.spec
-
-  spec.description ||= spec.summary
-
-  #TODO: add a recursive option
-  #spec.runtime_dependencies.each do |dep|
-  #  setup(dep.name)
-  #end
-end
-
-#puts "clearing tmp/"
-#FileUtils.rm_r "tmp" if File.directory? "tmp"
-FileUtils.mkdir RPGem::TMP unless File.directory? RPGem::TMP
-
-unless File.directory? RPGem::BUILD
-  FileUtils.mkdir RPGem::BUILD
-  FileUtils.in_dir RPGem::BUILD do
-    FileUtils.mkdir "SOURCES"
-    FileUtils.mkdir "SPECS"
-  end
-end
-
-RPGem.new(ARGV[0], ARGV[1]).setup!
+if [ -o build ]; then
+  cd rpmbuild && \
+    rpmbuild -vv -ba SPECS/rpgem-$gem_title.spec
+fi
