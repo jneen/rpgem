@@ -1,0 +1,39 @@
+%define rbname <%= spec.name %>
+%define version <%= spec.version %>
+%define release 1
+
+%define gemdir %(ruby -rubygems -e "puts Gem.dir")
+%define gembuilddir %{buildroot}%{gemdir}
+
+Summary: <% spec.summary %>
+Name: rpgem-%{rbname}
+
+Version: %{version}
+Release: %{release}
+Group: Development/Ruby
+License: Distributable
+URL: <%= spec.homepage %>
+Source0: %{rb-name}-%{version}.gem
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildArch: noarch
+Provides: ruby(<%= spec.name.capitalize %>) = %{version}
+
+%description
+<%= spec.description %>
+
+%prep
+
+%setup -n %{rbname}-%{version}
+
+
+%build
+mkdir -p %{gembuilddir}
+
+# "install" the gem so we can build the rpm from it
+gem install --local --install-dir %{gembuilddir} --force --no-rdoc %{SOURCE0}
+<%= if !spec.executables.empty? %>
+mkdir -p %{buildroot}/%{_bindir}
+mv %{gembuilddir}/bin/* %{buildroot}/%{_bindir}
+rmdir %{gembuilddir}/bin
+
+%install

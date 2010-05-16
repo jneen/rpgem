@@ -33,11 +33,11 @@ class RPGem
   end
 
   def sources_dir
-    "#{BUILD}/SOURCES/#{self.to_s}"
+    "#{BUILD}/SOURCES"
   end
 
   def gem_loc
-    "#{TMP}/#{self.to_s}.gem"
+    "#{sources_dir}/#{self.to_s}.gem"
   end
 
   def format
@@ -51,17 +51,6 @@ class RPGem
       puts "Fetching the gem #{self.to_s}"
       FileUtils.in_dir TMP do
         system("gem fetch #{@name} --version #{@version}")
-      end
-    end
-  end
-
-  def unpack!
-    if File.directory? self.sources_dir
-      puts "Skipping unpack of #{self.to_s}"
-    else
-      FileUtils.in_dir TMP do
-        puts "unpacking into SOURCES"
-        system("gem unpack #{gem_loc} --target=#{sources_dir}")
       end
     end
   end
