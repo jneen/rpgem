@@ -1,0 +1,48 @@
+%define rbname <%= spec.name %>
+%define local_gems_dir %(<%= @ruby_cmd %> -rubygems -e "puts Gem.dir")
+
+Name:		rpgem-%{rbname}
+Version:  <%= spec.version.to_s %>
+Release:	1%{?dist}
+Summary:	<%= spec.summary || spec.description %>
+
+
+Group: Development/Languages/Ruby
+License:  <%= spec.license || "#FIXME" %>
+URL:  <%= spec.homepage %>
+Source0:  <%= gem_loc %>
+BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+
+BuildRequires: ruby, rubygems
+Requires:	ruby
+
+%description
+<%= spec.description %>
+
+%prep
+#noop
+
+%build
+gem install <%= gem_loc %> --local --no-rdoc --no-ri --install-dir=.
+
+%install
+echo "moving gem files to %{local_gems_dir}..."
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT%{local_gems_dir}
+mv * $RPM_BUILD_ROOT%{local_gems_dir}/
+#TODO: bin
+chmod -R 0755 $RPM_BUILD_ROOT%{local_gems_dir}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{local_gems_dir}/gems/%{rbname}-%{version}/
+%{local_gems_dir}/specifications/%{rbname}-%{version}.gemspec
+%{local_gems_dir}/cache/%{rbname}-%{version}.gem
+%{local_gems_dir}/bin/
+
+
+%changelog

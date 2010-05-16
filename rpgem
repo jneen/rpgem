@@ -1,62 +1,97 @@
 #!/usr/bin/env ruby
 
-require 'lib/rpgem'
-require 'optparse'
+begin
+  require 'lib/rpgem'
+  require 'optparse'
 
-options = {}
-optparse = OptionParser.new do |opts|
-  opts.banner = <<-banner.split($/).map { |l| l.strip }.join($/)
-    Usage: rpgem gem_name [-r|--recursive] [-v|--version]
-  banner
+  options = {}
+  OptionParser.new do |opts|
+    opts.banner = <<-banner.split($/).map { |l| l.strip }.join($/)
+      Usage: rpgem gem_name [OPTIONS]
+      if no action is specified (-f, -s, -b), then all three will
+      be performed in that order.
+    banner
 
-  opts.on '-v', '--version', "Specify a specific gem version" do |v|
-    options[:version] = v
+    opts.on('-v',
+      '--version',
+      "Specify a specific gem version"
+    ) do |v|
+      options[:version] = v
+    end
+
+    opts.on('-V VER',
+      '--version-reqs VER',
+      "Specify a fuzzy version (i.e. '> 4.0')"
+    ) do |v|
+      options[:version_reqs] ||= []
+      options[:version_reqs] << v
+    end
+
+    opts.on('-R',
+      '--recursive',
+      "Recursively rpgem the dependencies"
+    ) do
+      options[:recursive] = true
+    end
+
+    opts.on('-f',
+      '--fetch',
+      "Fetch the gem"
+    ) do
+      options[:action] = :fetch!
+    end
+
+    opts.on('-s',
+      '--make-spec',
+      "Make the rpm specfile"
+    ) do
+      options[:action] = :make_spec!
+    end
+
+    opts.on('-b',
+      '--build',
+      "Build the rpm"
+    ) do
+      options[:action] = :build!
+    end
+
+    opts.on('-r RUBY',
+      '--ruby RUBY',
+      "Specify which ruby to use.  Default: ruby"
+    ) do |r|
+      options[:ruby_cmd] = r
+    end
+  end.parse!
+
+  options.rmerge!({
+    :version => nil,
+    :recursive => false,
+    :version_reqs => [],
+    :action => :setup!
+    :ruby_cmd => "ruby"
+  })
+
+  p [options, ARGV]
+
+  FileUtils.mkdir RPGem::TMP unless File.directory? RPGem::TMP
+
+  unless File.directory? RPGem::RPMBUILD_DIR
+    FileUtils.mkdir RPGem::RPMBUILD_DIR
+    FileUtils.in_dir RPGem::RPMBUILD_DIR do
+      FileUtils.mkdir "SOURCES"
+      FileUtils.mkdir "SPECS"
+    end
   end
 
-  opts.on '-V VER', '--version-reqs VER', "Specify a fuzzy version (i.e. '> 4.0')" do |v|
-    options[:version_reqs] ||= []
-    options[:version_reqs] << v
+  g = RPGem.new(ARGV[0], options)
+  g.send(options[:action])
+  if options[:recursive]
+    g.recurse!(options[:action])
   end
 
-  opts.on '-r', '--recursive', "Recursively rpgem the dependencies" do
-    options[:recursive] = true
-  end
+
+rescue Exception => e
+  puts e.to_s
+  puts e.backtrace
+  exit! 1
 end
-
-optparse.parse!
-
-options.rmerge!({
-  :version => nil,
-  :recursive => false,
-  :version_reqs => []
-})
-
-p [options, ARGV]
-
-def setup(gem_name, version)
-  gem = RPGem.new(gem_name, version)
-
-  format = Gem::Format.from_file_by_path(gem_for(gem_name, version))
-  spec = format.spec
-
-  spec.description ||= spec.summary
-
-  #TODO: add a recursive option
-  #spec.runtime_dependencies.each do |dep|
-  #  setup(dep.name)
-  #end
-end
-
-#puts "clearing tmp/"
-#FileUtils.rm_r "tmp" if File.directory? "tmp"
-FileUtils.mkdir RPGem::TMP unless File.directory? RPGem::TMP
-
-unless File.directory? RPGem::BUILD
-  FileUtils.mkdir RPGem::BUILD
-  FileUtils.in_dir RPGem::BUILD do
-    FileUtils.mkdir "SOURCES"
-    FileUtils.mkdir "SPECS"
-  end
-end
-
-RPGem.new(ARGV[0], options).setup!
