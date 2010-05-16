@@ -23,6 +23,8 @@ Requires:	ruby
 #noop
 
 %build
+rm -rf $RPM_BUILD_ROOT
+mkdir $RPM_BUILD_ROOT
 gem install <%= gem_loc %> --local --no-rdoc --no-ri --install-dir=.
 
 %install
