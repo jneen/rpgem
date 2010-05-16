@@ -51,7 +51,7 @@ class RPGem
     options.rmerge!({
       :version => nil,
       :version_reqs => [],
-      :recursive => false
+      :recursive => false,
       :ruby_cmd => "ruby"
     })
     options.each do |k,v|

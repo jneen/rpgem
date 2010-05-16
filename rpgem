@@ -67,7 +67,7 @@ begin
     :version => nil,
     :recursive => false,
     :version_reqs => [],
-    :action => :setup!
+    :action => :setup!,
     :ruby_cmd => "ruby"
   })
 
