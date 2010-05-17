@@ -53,7 +53,8 @@ class RPGem
       :version => nil,
       :version_reqs => [],
       :recursive => false,
-      :ruby_cmd => "ruby"
+      :ruby_cmd => "ruby",
+      :dependencies => []
     })
     @options.each do |k,v|
       instance_variable_set("@#{k}", v)

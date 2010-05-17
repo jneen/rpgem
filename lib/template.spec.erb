@@ -1,11 +1,11 @@
 <%
   ruby_ver = begin
     v = spec.required_ruby_version.to_s
-    v = ">= 0" ? "" : " #{v}"
+    v == ">= 0" ? "" : " #{v}"
   end
   rubygems_ver = begin
     v = spec.required_rubygems_version.to_s
-    v = ">= 0" ? "" : " #{v}"
+    v == ">= 0" ? "" : " #{v}"
   end
 
 %>
