@@ -64,7 +64,7 @@ begin
 
     opts.on('-p PREFIX',
       '--prefix PREFIX',
-      'Specify a prefix to use during the install.  Default: /usr/lib'
+      'Specify a prefix to use during the install.  Default: /usr'
     ) do |p|
       options[:prefix] = p.chomp('/')
     end
@@ -84,7 +84,7 @@ begin
     :version_reqs => [],
     :action => :build!,
     :ruby_cmd => "ruby",
-    :prefix => '/usr/lib',
+    :prefix => '/usr',
     :dependencies => []
   })
 
