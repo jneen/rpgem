@@ -23,7 +23,7 @@ Source0:  %{_sourcedir}/%{rbname}-%{version}.gem
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Vendor: <%= spec.author %>
 
-BuildRequires: ruby<%=ruby_ver%><%=rubygems_ver%>
+BuildRequires: ruby<%=ruby_ver%>, rubygems<%=rubygems_ver%>
 Requires:	ruby<%=ruby_ver%>, rubygems<%=rubygems_ver%><%=
   spec.runtime_dependencies.map do |d|
     ", rpgem-#{d.name} #{d.requirements_list.first.gsub(/~>/,'>=')}"
