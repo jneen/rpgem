@@ -28,6 +28,8 @@ Requires:	ruby<%=ruby_ver%>, rubygems<%=rubygems_ver%><%=
   spec.runtime_dependencies.map do |d|
     ", rpgem-#{d.name} #{d.requirements_list.first.gsub(/~>/,'>=')}"
   end.join
+%><%=
+  @dependencies.map {|d| ", #{d}"}.join
 %>
 
 Prefix: <%=@prefix%>

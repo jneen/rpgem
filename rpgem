@@ -68,6 +68,14 @@ begin
     ) do |p|
       options[:prefix] = p.chomp('/')
     end
+
+    opts.on('-d DEPENDS',
+      '--depends DEPENDS',
+      'Specify a non-gem dependency (e.g. mysql-devel, etc.)'
+    ) do |d|
+      options[:dependencies] ||= []
+      options[:dependencies] << d
+    end
   end.parse!
 
   options.rmerge!({
@@ -76,7 +84,8 @@ begin
     :version_reqs => [],
     :action => :build!,
     :ruby_cmd => "ruby",
-    :prefix => '/usr/lib'
+    :prefix => '/usr/lib',
+    :dependencies => []
   })
 
   p [options, ARGV]
