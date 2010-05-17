@@ -34,7 +34,7 @@ Requires:	ruby<%=ruby_ver%>, rubygems<%=rubygems_ver%><%=
 
 Prefix: <%=@prefix%>
 
-%define gem_prefix %{prefix}/lib/gems/%(<%=@ruby_cmd%> -e "puts VERSION.split('.')[0..1].join('.')")
+%define gem_prefix %{prefix}/lib/gems/%(%{prefix}/bin/ruby -e "puts VERSION.split('.')[0..1].join('.')")
 
 %description
 <%= spec.description %>
@@ -45,7 +45,7 @@ Prefix: <%=@prefix%>
 %build
 rm -rf $RPM_BUILD_ROOT
 mkdir $RPM_BUILD_ROOT
-gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
+%{prefix}/bin/gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
 
 %install
 
