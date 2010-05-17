@@ -20,6 +20,7 @@ class Hash
     hsh.each do |k,v|
       self[k] = v unless self.has_key? k
     end
+    self
   end
 
   def rmerge(hsh)
@@ -48,13 +49,13 @@ class RPGem
 
   def initialize(name, options={})
     @name = name
-    options.rmerge!({
+    @options = options.rmerge({
       :version => nil,
       :version_reqs => [],
       :recursive => false,
       :ruby_cmd => "ruby"
     })
-    options.each do |k,v|
+    @options.each do |k,v|
       instance_variable_set("@#{k}", v)
     end
   end
@@ -80,7 +81,7 @@ class RPGem
   end
 
   def spec_loc
-    "#{SPECS_DIR}/rpgem-#{self.to_s}.gem"
+    "#{SPECS_DIR}/rpgem-#{self.to_s}.spec"
   end
 
   def format
@@ -99,10 +100,10 @@ class RPGem
     end
 
     currents = `ls #{SOURCES_DIR} | grep '^#{d.name}'`.split($/)
-    return false if currents.empty?
+    return nil if currents.empty?
 
     currents.each do |c|
-      ver = c.match(/-(\d+(\.\d+)+)\.gem$/)[1]
+      ver = c.match(/-(\d+(\.\d+)+)(\.gem)?$/)[1]
       return ver if d.match?(d.name, ver)
     end
     return nil
@@ -137,7 +138,6 @@ class RPGem
   end
 
   def make_spec!
-    fetch!
     puts "rendering the specfile..."
     template = File.read("#{LIB_DIR}/template.spec.erb")
     specfile = ERB.new(template).result(binding)
@@ -150,34 +150,27 @@ class RPGem
   end
 
   def build!
-    fetch!
     make_spec!
-
     puts "-*- Building RPM -*-"
     FileUtils.in_dir RPMBUILD_DIR do
-      system("rpmbuild -vv -ba #{spec_loc}")
+      system("rpmbuild -ba #{spec_loc}")
     end
     puts "-*- Done Building RPM -*-"
   end
 
-  def setup!
-    fetch!
-    make_spec!
-    build!
-  end
-
   def recurse!(action=:setup!)
     #TODO: add an option for dev dependencies
+    #TODO: don't choke on circular dependencies
     deps = self.spec.runtime_dependencies
     deps.each do |d|
-      if !fetched?(d)
-        g = self.class.new(d.name,
-          :version_reqs => d.requirements_list,
-          :recursive => true
-        )
-        g.send(action)
-        g.recurse!(action)
-      end
+      g = self.class.new(d.name,
+        :version_reqs => d.requirements_list,
+        :recursive => true,
+        :ruby_cmd => @ruby_cmd
+      )
+      g.fetch!
+      g.recurse!(action)
+      g.send(action) unless action == :fetch!
     end
   end
 end

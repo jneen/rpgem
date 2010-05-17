@@ -12,8 +12,8 @@ begin
       be performed in that order.
     banner
 
-    opts.on('-v',
-      '--version',
+    opts.on('-v VER',
+      '--version VER',
       "Specify a specific gem version"
     ) do |v|
       options[:version] = v
@@ -50,7 +50,7 @@ begin
 
     opts.on('-b',
       '--build',
-      "Build the rpm"
+      "Build the rpm (this is the default)"
     ) do
       options[:action] = :build!
     end
@@ -67,7 +67,7 @@ begin
     :version => nil,
     :recursive => false,
     :version_reqs => [],
-    :action => :setup!,
+    :action => :build!,
     :ruby_cmd => "ruby"
   })
 
@@ -84,10 +84,11 @@ begin
   end
 
   g = RPGem.new(ARGV[0], options)
-  g.send(options[:action])
+  g.fetch!
   if options[:recursive]
     g.recurse!(options[:action])
   end
+  g.send(options[:action]) unless options[:action] == :fetch!
 
 
 rescue Exception => e

@@ -1,3 +1,14 @@
+<%
+  ruby_ver = begin
+    v = spec.required_ruby_version.to_s
+    v = ">= 0" ? "" : " #{v}"
+  end
+  rubygems_ver = begin
+    v = spec.required_rubygems_version.to_s
+    v = ">= 0" ? "" : " #{v}"
+  end
+
+%>
 %define rbname <%= spec.name %>
 %define local_gems_dir %(<%= @ruby_cmd %> -rubygems -e "puts Gem.dir")
 
@@ -8,13 +19,18 @@ Summary:	<%= spec.summary || spec.description %>
 
 
 Group: Development/Languages/Ruby
-License:  <%= spec.license || "#FIXME" %>
+License:  <%= spec.license || "#FIXME - this gem has an unspecified license!" %>
 URL:  <%= spec.homepage %>
-Source0:  <%= gem_loc %>
+Source0:  %{_sourcedir}/%{rbname}-%{version}.gem
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+Vendor: <%= spec.author %>
 
-BuildRequires: ruby, rubygems
-Requires:	ruby
+BuildRequires: ruby<%=ruby_ver%><%=rubygems_ver%>
+Requires:	ruby<%=ruby_ver%>, rubygems<%=rubygems_ver%><%=
+  spec.runtime_dependencies.map do |d|
+    ", rpgem-#{d.name} #{d.requirements_list.first.gsub(/~>/,'>=')}"
+  end.join
+%>
 
 %description
 <%= spec.description %>
@@ -25,10 +41,10 @@ Requires:	ruby
 %build
 rm -rf $RPM_BUILD_ROOT
 mkdir $RPM_BUILD_ROOT
-gem install <%= gem_loc %> --local --no-rdoc --no-ri --install-dir=.
+gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
 
 %install
-echo "moving gem files to %{local_gems_dir}..."
+#echo "moving gem files to %{local_gems_dir}..."
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{local_gems_dir}
 mv * $RPM_BUILD_ROOT%{local_gems_dir}/
@@ -44,7 +60,9 @@ rm -rf $RPM_BUILD_ROOT
 %{local_gems_dir}/gems/%{rbname}-%{version}/
 %{local_gems_dir}/specifications/%{rbname}-%{version}.gemspec
 %{local_gems_dir}/cache/%{rbname}-%{version}.gem
+<% unless spec.executables.empty? %>
 %{local_gems_dir}/bin/
+<% end %>
 
 
 %changelog
