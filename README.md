@@ -1,4 +1,4 @@
-## Why?
+# Why
 
 Gems have a habit of building native extensions from source.
 On development machines, this is not a problem.
@@ -6,12 +6,16 @@ On production machines, it means we require gcc, and
 gems are painfully slow to install.
 
 
-## What RPGem does
+# What
 
 RPGem will create a binary RPM with the *compiled* extensions,
 which you can install on a machine painlessly.
 
-## Usage
+# Where
+
+    gem install rpgem
+
+# How
 
     rpgem [gem_name] [OPTIONS]
 
@@ -38,7 +42,7 @@ which you can install on a machine painlessly.
     -b, --build                 Fetch the gems, create the specfile, and build the rpm
                                 (this is the default)
 
-## Examples
+## For example
 
 mysql:
     rpgem mysql -v 2.8.1 -d 'mysql > 5.0' -d mysql-devel
