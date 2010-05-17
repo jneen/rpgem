@@ -61,6 +61,13 @@ begin
     ) do |r|
       options[:ruby_cmd] = r
     end
+
+    opts.on('-p PREFIX',
+      '--prefix PREFIX',
+      'Specify a prefix to use during the install.  Default: /usr/lib'
+    ) do |p|
+      options[:prefix] = p.chomp('/')
+    end
   end.parse!
 
   options.rmerge!({
@@ -68,7 +75,8 @@ begin
     :recursive => false,
     :version_reqs => [],
     :action => :build!,
-    :ruby_cmd => "ruby"
+    :ruby_cmd => "ruby",
+    :prefix => '/usr/lib'
   })
 
   p [options, ARGV]

@@ -10,13 +10,11 @@
 
 %>
 %define rbname <%= spec.name %>
-%define local_gems_dir %(<%= @ruby_cmd %> -rubygems -e "puts Gem.dir")
 
 Name:		rpgem-%{rbname}
 Version:  <%= spec.version.to_s %>
 Release:	1%{?dist}
 Summary:	<%= spec.summary || spec.description %>
-
 
 Group: Development/Languages/Ruby
 License:  <%= spec.license || "#FIXME - this gem has an unspecified license!" %>
@@ -32,6 +30,8 @@ Requires:	ruby<%=ruby_ver%>, rubygems<%=rubygems_ver%><%=
   end.join
 %>
 
+Prefix: <%=@prefix%>
+
 %description
 <%= spec.description %>
 
@@ -45,11 +45,12 @@ gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
 
 %install
 #echo "moving gem files to %{local_gems_dir}..."
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{local_gems_dir}
-mv * $RPM_BUILD_ROOT%{local_gems_dir}/
-#TODO: bin
-chmod -R 0755 $RPM_BUILD_ROOT%{local_gems_dir}
+
+rm -rf $RPM_BUILD_ROOT%{prefix}
+tree $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT%{prefix}
+mv * $RPM_BUILD_ROOT%{prefix}
+chmod -R 0755 $RPM_BUILD_ROOT%{prefix}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -57,11 +58,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{local_gems_dir}/gems/%{rbname}-%{version}/
-%{local_gems_dir}/specifications/%{rbname}-%{version}.gemspec
-%{local_gems_dir}/cache/%{rbname}-%{version}.gem
-<% unless spec.executables.empty? %>
-%{local_gems_dir}/bin/
+%{prefix}/gems/%{rbname}-%{version}/
+%{prefix}/specifications/%{rbname}-%{version}.gemspec
+%{prefix}/cache/%{rbname}-%{version}.gem
+<% spec.executables.each do |e| %>
+%{prefix}/bin/<%= e %>
 <% end %>
 
 
