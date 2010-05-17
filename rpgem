@@ -20,7 +20,7 @@ begin
     end
 
     opts.on('-V VER',
-      '--version-reqs VER',
+      '--version-req VER',
       "Specify a fuzzy version (i.e. '> 4.0')"
     ) do |v|
       options[:version_reqs] ||= []
@@ -53,13 +53,6 @@ begin
       "Build the rpm (this is the default)"
     ) do
       options[:action] = :build!
-    end
-
-    opts.on('-r RUBY',
-      '--ruby RUBY',
-      "Specify which ruby to use.  Default: ruby"
-    ) do |r|
-      options[:ruby_cmd] = r
     end
 
     opts.on('-p PREFIX',
