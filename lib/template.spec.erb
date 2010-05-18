@@ -30,10 +30,10 @@ Summary:	<%= spec.summary || spec.description %>
 
 Group: Development/Languages/Ruby
 License: <%= spec.license || "#FIXME - this gem has an unspecified license" %>
-<%= "Url: #{spec.homepage}" if spec.homepage %>
+<%= "Url: #{spec.homepage}" unless spec.homepage.empty? %>
 Source0:  %{_sourcedir}/%{rbname}-%{version}.gem
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-<%= "Vendor: #{spec.author}" if spec.author %>
+<%= "Vendor: #{spec.author}" unless spec.author.empty? %>
 
 BuildRequires: <%= build_requires %>
 Requires:	<%= requires %>

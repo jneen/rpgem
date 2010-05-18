@@ -169,6 +169,8 @@ class RPGem
     #TODO: don't choke on circular dependencies
     deps = self.spec.runtime_dependencies
     deps.each do |d|
+      puts
+      puts "#{self.to_s} depends on #{d.name}"
       g = self.class.new(d.name,
         :version_reqs => d.requirements_list,
         :recursive => true,
