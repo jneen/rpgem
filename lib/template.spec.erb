@@ -8,14 +8,18 @@
     v == ">= 0" ? "" : " #{v}"
   end
 
-  requires = "ruby#{ruby_ver}, rubygems#{rubygems_ver}#{
+  ruby = @ree ? "ruby-enterprise" : "ruby"
+  rubygems = @ree ? "ruby-enterprise-rubygems" : "rubygems"
+
+  requires = "#{ruby}#{ruby_ver}, #{rubygems}#{rubygems_ver}#{
     (spec.runtime_dependencies.map do |d|
       ", rpgem-#{d.name} #{d.requirements_list.first.gsub(/~>/,'>=')}"
     end.join + @dependencies.map do |d|
       ", #{d}"
     end.join)
   }"
-  build_requires = requires + @build_dependencies.map { |d| ", #{d}"}.join
+  build_requires = "ruby#{ruby_ver}, rubygems#{rubygems_ver}" + 
+    [@dependencies + @build_dependencies].map { |d| ", #{d}"}.join
 %>
 %define rbname <%= spec.name %>
 
@@ -47,7 +51,7 @@ Prefix: <%=@prefix%>
 %build
 rm -rf $RPM_BUILD_ROOT
 mkdir $RPM_BUILD_ROOT
-%{prefix}/bin/gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
+gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
 
 %install
 

@@ -49,13 +49,17 @@ class RPGem
 
   def initialize(name, options={})
     @name = name
-    @options = options.rmerge({
+    @options = options.rmerge!({
       :version => nil,
-      :version_reqs => [],
       :recursive => false,
+      :version_reqs => [],
       :ruby_cmd => "ruby",
-      :dependencies => []
+      :prefix => '/usr',
+      :dependencies => [],
+      :build_dependencies => [],
+      :ree => false
     })
+
     @options.each do |k,v|
       instance_variable_set("@#{k}", v)
     end
@@ -167,7 +171,8 @@ class RPGem
       g = self.class.new(d.name,
         :version_reqs => d.requirements_list,
         :recursive => true,
-        :ruby_cmd => @ruby_cmd
+        :prefix => @prefix,
+        :ree => @ree
       )
       g.fetch!
       g.recurse!(action)

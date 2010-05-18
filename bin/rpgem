@@ -70,23 +70,25 @@ begin
       options[:dependencies] << d
     end
 
-    opts.on('--build-dependency BD',
+    opts.on('-B BD',
+      '--build-dependency BD',
       'Specify a build dependency (e.g. mysql-devel)'
     ) do |bd|
       options[:build_dependencies] ||= []
       options[:build_dependencies] << bd
     end
+
+    opts.on('-E',
+      '--ree',
+      'Use Ruby Enterprise Edition'
+    ) do
+      options[:ree] = true
+    end
   end.parse!
 
   options.rmerge!({
-    :version => nil,
     :recursive => false,
-    :version_reqs => [],
-    :action => :build!,
-    :ruby_cmd => "ruby",
-    :prefix => '/usr',
-    :dependencies => [],
-    :build_dependencies => []
+    :action => :build!
   })
 
   p [options, ARGV]
