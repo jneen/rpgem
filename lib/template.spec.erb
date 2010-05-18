@@ -19,7 +19,7 @@
     end.join)
   }"
   build_requires = "ruby#{ruby_ver}, rubygems#{rubygems_ver}" + 
-    [@dependencies + @build_dependencies].map { |d| ", #{d}"}.join
+    (@dependencies + @build_dependencies).map { |d| ", #{d}"}.join
 %>
 %define rbname <%= spec.name %>
 
