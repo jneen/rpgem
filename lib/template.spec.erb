@@ -29,11 +29,11 @@ Release:	1%{?dist}
 Summary:	<%= spec.summary || spec.description %>
 
 Group: Development/Languages/Ruby
-License:  <%= spec.license || "#FIXME - this gem has an unspecified license!" %>
-URL:  <%= spec.homepage %>
+<%= "License: #{spec.license}" if spec.license %>
+<%= "Url: #{spec.homepage}" if spec.homepage %>
 Source0:  %{_sourcedir}/%{rbname}-%{version}.gem
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-Vendor: <%= spec.author %>
+<%= "Vendor: #{spec.author}" if spec.author %>
 
 BuildRequires: <%= build_requires %>
 Requires:	<%= requires %>
@@ -55,7 +55,6 @@ gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
 
 %install
 
-echo %{gem_prefix}
 rm -rf $RPM_BUILD_ROOT%{gem_prefix}
 mkdir -p $RPM_BUILD_ROOT%{gem_prefix}
 mv * $RPM_BUILD_ROOT%{gem_prefix}

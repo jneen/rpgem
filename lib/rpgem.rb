@@ -143,7 +143,7 @@ class RPGem
   end
 
   def make_spec!
-    puts "rendering the specfile..."
+    puts "Rendering specfile for #{self.to_s}"
     template = File.read("#{LIB_DIR}/template.spec.erb")
     specfile = ERB.new(template).result(binding)
     puts "rendered:"
@@ -156,11 +156,12 @@ class RPGem
 
   def build!
     make_spec!
-    puts "-*- Building RPM -*-"
+    puts
+    puts "-*- Building RPM rpgem-#{self.to_s} -*-"
     FileUtils.in_dir RPMBUILD_DIR do
       system("rpmbuild -ba #{spec_loc}")
     end
-    puts "-*- Done Building RPM -*-"
+    puts "-*- Done Building RPM rpgem-#{self.to_s} -*-"
   end
 
   def recurse!(action=:setup!)
