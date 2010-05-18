@@ -64,10 +64,17 @@ begin
 
     opts.on('-d DEPENDS',
       '--depends DEPENDS',
-      'Specify a non-gem dependency (e.g. mysql-devel, etc.)'
+      'Specify a non-gem dependency (e.g. mysql, etc.)'
     ) do |d|
       options[:dependencies] ||= []
       options[:dependencies] << d
+    end
+
+    opts.on('--build-dependency BD',
+      'Specify a build dependency (e.g. mysql-devel)'
+    ) do |bd|
+      options[:build_dependencies] ||= []
+      options[:build_dependencies] << bd
     end
   end.parse!
 
@@ -78,7 +85,8 @@ begin
     :action => :build!,
     :ruby_cmd => "ruby",
     :prefix => '/usr',
-    :dependencies => []
+    :dependencies => [],
+    :build_dependencies => []
   })
 
   p [options, ARGV]
