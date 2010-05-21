@@ -61,7 +61,7 @@ mv * $RPM_BUILD_ROOT%{gem_prefix}
 
 mkdir $RPM_BUILD_ROOT%{prefix}/bin
 <% spec.executables.each do |e| %>
-ln -s $RPM_BUILD_ROOT%{gem_prefix}/bin/<%=e%> %{prefix}/bin/<%=e%>
+ln -s %{gem_prefix}/bin/<%=e%> $RPM_BUILD_ROOT%{prefix}/bin/<%=e%>
 <% end %>
 
 #remove test and spec files, or RPM throws a fit.
