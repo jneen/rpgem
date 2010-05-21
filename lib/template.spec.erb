@@ -78,6 +78,7 @@ rm -rf $RPM_BUILD_ROOT
 %{gem_prefix}/cache/%{rbname}-%{version}.gem
 <% spec.executables.each do |e| %>
 %{gem_prefix}/bin/<%= e %>
+%{prefix}/bin/<%= e %>
 <% end %>
 
 
