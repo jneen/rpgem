@@ -40,7 +40,7 @@ Requires:	<%= requires %>
 
 Prefix: <%=@prefix%>
 
-%define gem_prefix %{prefix}/lib/ruby/gems/%(%{prefix}/bin/ruby -e "puts VERSION.split('.')[0..1].join('.')")
+%define gem_prefix %{prefix}/lib/ruby/gems/%(ruby -e "puts VERSION.split('.')[0..1].join('.')")
 
 %description
 <%= spec.description %>
