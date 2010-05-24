@@ -52,6 +52,11 @@ Prefix: <%=@prefix%>
 rm -rf $RPM_BUILD_ROOT
 mkdir $RPM_BUILD_ROOT
 gem install %{SOURCE0} --force --local --no-rdoc --no-ri --install-dir=.
+ls
+<%= "cd gems/%{rbname}-%{version}" unless @rake_tasks.empty? %>
+<% @rake_tasks.each do |t| %>
+rake <%=t%>
+<% end %>
 
 %install
 

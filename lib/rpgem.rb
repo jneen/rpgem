@@ -57,7 +57,8 @@ class RPGem
       :prefix => '/usr',
       :dependencies => [],
       :build_dependencies => [],
-      :ree => false
+      :ree => false,
+      :rake_tasks => [],
     })
 
     @options.each do |k,v|
@@ -159,7 +160,7 @@ class RPGem
     puts
     puts "-*- Building RPM rpgem-#{self.to_s} -*-"
     FileUtils.in_dir RPMBUILD_DIR do
-      system("rpmbuild -ba #{spec_loc}")
+      system("rpmbuild -ba -v #{spec_loc}")
     end
     puts "-*- Done Building RPM rpgem-#{self.to_s} -*-"
   end

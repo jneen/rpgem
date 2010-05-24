@@ -84,6 +84,14 @@ begin
     ) do
       options[:ree] = true
     end
+
+    opts.on('-k TASK',
+      '--rake TASK',
+      'Run the specified rake task during build.'
+    ) do |t|
+      options[:rake_tasks] ||= []
+      options[:rake_tasks] << t
+    end
   end.parse!
 
   options.rmerge!({
