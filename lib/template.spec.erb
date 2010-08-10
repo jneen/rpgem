@@ -25,7 +25,9 @@
 
 Name:		rpgem-%{rbname}
 Version:  <%= spec.version.to_s %>
-Release:	1%{?dist}
+Release:	<%=
+  spec.respond_to?(:specification_version) ? spec.specification_version : 1
+%>%{?dist}
 Summary:	<%= spec.summary || spec.description %>
 
 Group: Development/Languages/Ruby
