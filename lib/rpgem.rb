@@ -3,16 +3,6 @@ require 'rubygems'
 require 'rubygems/format'
 require 'erb'
 
-module FileUtils
-  def self.in_dir(dir)
-    cwd = `pwd`.strip
-    cd dir
-    r = yield
-    cd cwd
-    r
-  end
-end
-
 class Hash
   # like merge!, but doesn't update existing keys.
   # useful for defaulting options
@@ -129,14 +119,14 @@ class RPGem
       if @version.nil?
         system("rm -rf #{TMP}")
         system("mkdir #{TMP}")
-        FileUtils.in_dir TMP do
+        FileUtils.cd TMP do
           system("gem fetch #{@name} #{sh_version_reqs}")
           gem_title = `ls`
           @version = gem_title.match(/-(\d+(\.\d+)+)\.gem$/)[1]
         end
         system("mv #{TMP}/* #{SOURCES_DIR}/")
       else
-        FileUtils.in_dir SOURCES_DIR do
+        FileUtils.cd SOURCES_DIR do
           system("gem fetch #{@name} --version #{@version}")
         end
       end
@@ -159,7 +149,7 @@ class RPGem
     make_spec!
     puts
     puts "-*- Building RPM rpgem-#{self.to_s} -*-"
-    FileUtils.in_dir RPMBUILD_DIR do
+    FileUtils.cd RPMBUILD_DIR do
       system("rpmbuild -ba -v #{spec_loc}")
     end
     puts "-*- Done Building RPM rpgem-#{self.to_s} -*-"
